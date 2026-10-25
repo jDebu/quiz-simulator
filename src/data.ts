@@ -1,0 +1,348 @@
+import type { Quiz } from './types'
+
+export const SEED_QUIZZES: Quiz[] = [
+  {
+    id: 1,
+    title: 'CAS · Conductor Institucional PCM',
+    entity: 'Presidencia del Consejo de Ministros',
+    timeLimitMinutes: 20,
+    questionsPerExam: 10,
+    pointsPerQuestion: 1,
+    passingScore: 7,
+    published: true,
+    questions: [
+      {
+        id: 101,
+        prompt: 'Si se encuentra ante la luz roja de un semáforo y un Policía de Tránsito le indica que continúe la marcha, ¿qué debe hacer?',
+        explanation: 'Las indicaciones del Policía de Tránsito prevalecen sobre los semáforos y señales de tránsito.',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 1011, label: 'Detenerse; el semáforo en rojo siempre tiene prioridad absoluta.', isCorrect: false },
+          { id: 1012, label: 'Continuar la marcha; las indicaciones del Policía prevalecen sobre los semáforos.', isCorrect: true },
+          { id: 1013, label: 'Tocar el claxon para pedir confirmación antes de avanzar.', isCorrect: false },
+        ],
+      },
+      {
+        id: 102,
+        prompt: '¿Quiénes están obligados a obedecer los dispositivos de control de tránsito?',
+        explanation: 'El Reglamento Nacional de Tránsito establece que tanto conductores como peatones deben obedecer los dispositivos de control.',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 1021, label: 'Solo los conductores de vehículos motorizados.', isCorrect: false },
+          { id: 1022, label: 'Solo los peatones en zonas escolares.', isCorrect: false },
+          { id: 1023, label: 'Tanto los conductores como los peatones.', isCorrect: true },
+        ],
+      },
+      {
+        id: 103,
+        prompt: 'Al circular por la noche en vías públicas urbanas, ¿qué luces se deben utilizar?',
+        explanation: 'Las luces altas deslumbran a otros conductores; en zona urbana nocturna se usan las luces bajas.',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 1031, label: 'Luces altas para mayor visibilidad.', isCorrect: false },
+          { id: 1032, label: 'Las luces bajas.', isCorrect: true },
+          { id: 1033, label: 'Solo las luces de posición (parqueo).', isCorrect: false },
+        ],
+      },
+      {
+        id: 104,
+        prompt: 'Durante una comisión de servicios transportando funcionarios de la PCM, el vehículo sufre un sobrecalentamiento indicado en el tablero. ¿Cuál es la acción inmediata correcta?',
+        explanation: 'Continuar puede dañar irreversiblemente el motor. Se debe estacionar de forma segura, apagar el motor, esperar a que enfríe y reportar al área de transportes.',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 1041, label: 'Continuar la marcha hasta llegar al destino para no retrasar la reunión.', isCorrect: false },
+          { id: 1042, label: 'Estacionar en lugar seguro, apagar el motor, esperar a que enfríe y reportar al área de transportes.', isCorrect: true },
+          { id: 1043, label: 'Retirar la tapa del radiador con el motor encendido para revisar el refrigerante.', isCorrect: false },
+        ],
+      },
+      {
+        id: 105,
+        prompt: 'Se encuentra conduciendo en una avenida urbana de dos carriles. Decide adelantar a un vehículo pesado lento. ¿Por cuál lado debe efectuar obligatoriamente la maniobra?',
+        explanation: 'El adelantamiento se realiza por la izquierda, señalizando previamente y retornando al carril derecho una vez completada la maniobra.',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 1051, label: 'Por el lado derecho, si el carril se encuentra totalmente despejado.', isCorrect: false },
+          { id: 1052, label: 'Por el lado izquierdo, señalizando previamente y retornando al carril una vez completada la acción.', isCorrect: true },
+          { id: 1053, label: 'Por cualquier lado, siempre que no exceda el límite de velocidad.', isCorrect: false },
+        ],
+      },
+      {
+        id: 106,
+        prompt: 'Al realizar la inspección diaria del vehículo oficial, nota que el nivel de líquido de frenos está por debajo del mínimo. ¿Cuál es el procedimiento correcto?',
+        explanation: 'El nivel bajo de líquido de frenos es un indicador de posible fuga o desgaste de pastillas. El vehículo no debe operarse hasta revisión técnica.',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 1061, label: 'Completar el nivel con agua destilada provisionalmente.', isCorrect: false },
+          { id: 1062, label: 'Ignorar el nivel; si el pedal se siente firme no hay problema.', isCorrect: false },
+          { id: 1063, label: 'Reportar al encargado de Transportes y abstenerse de operar el vehículo hasta revisión técnica.', isCorrect: true },
+        ],
+      },
+      {
+        id: 107,
+        prompt: 'Siguiendo el protocolo internacional de seguridad vial (PAS), al encontrar un accidente con heridos en la carretera, ¿cuál debe ser su primera acción?',
+        explanation: 'PAS: Proteger → Avisar → Socorrer. La primera acción es siempre proteger la zona para evitar nuevos impactos.',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 1071, label: 'Proteger la zona (estacionar en lugar seguro, encender luces de emergencia).', isCorrect: true },
+          { id: 1072, label: 'Retirar rápidamente a los heridos de los vehículos antes de que exploten.', isCorrect: false },
+          { id: 1073, label: 'Llamar a la central de la PCM para avisar el retraso.', isCorrect: false },
+        ],
+      },
+      {
+        id: 108,
+        prompt: 'Un funcionario de alto rango le pide estacionar el vehículo oficial sobre una zona rígida (línea amarilla), diciendo "solo serán 5 minutos, yo asumo la responsabilidad". ¿Cómo debe actuar?',
+        explanation: 'El conductor CAS es responsable del vehículo y debe cumplir el reglamento de tránsito independientemente de la jerarquía de quien da la orden.',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 1081, label: 'Obedecer de inmediato; los funcionarios de la PCM tienen inmunidad.', isCorrect: false },
+          { id: 1082, label: 'Apagar el motor y acompañar al funcionario para evitar que le dejen la multa.', isCorrect: false },
+          { id: 1083, label: 'Explicar que el reglamento prohíbe el estacionamiento en zonas rígidas y buscar el lugar autorizado más cercano.', isCorrect: true },
+        ],
+      },
+      {
+        id: 109,
+        prompt: 'Un conductor de la PCM transporta a un proveedor de la institución. Al bajarse, el proveedor le deja una canasta de víveres en el asiento en señal de agradecimiento. Según el Código de Ética, ¿cómo debe actuar?',
+        explanation: 'El Código de Ética (Ley N° 27815) prohíbe expresamente recibir dádivas, obsequios o favores de personas con intereses en la institución.',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 1091, label: 'Aceptarla amablemente; es un obsequio personal dado fuera del horario de oficina.', isCorrect: false },
+          { id: 1092, label: 'Recibirla y repartir los productos con sus compañeros del área de transportes.', isCorrect: false },
+          { id: 1093, label: 'Rechazar el obsequio firmemente; el Código de Ética prohíbe recibir dádivas de personas con intereses en la institución.', isCorrect: true },
+        ],
+      },
+      {
+        id: 110,
+        prompt: '¿Cuál es la velocidad máxima permitida para un vehículo en una zona residencial en el Perú?',
+        explanation: 'El Reglamento Nacional de Tránsito fija en 30 km/h el límite en calles, jirones y zonas residenciales.',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 1101, label: '50 km/h.', isCorrect: false },
+          { id: 1102, label: '30 km/h.', isCorrect: true },
+          { id: 1103, label: '40 km/h.', isCorrect: false },
+        ],
+      },
+      {
+        id: 111,
+        prompt: 'Si durante la conducción el pedal de freno se siente "esponjoso" y hay que presionarlo hasta el fondo para detener el vehículo, ¿cuál es la causa más probable?',
+        explanation: 'La sensación esponjosa es síntoma clásico de burbujas de aire en las líneas de freno (el aire se comprime, el líquido no).',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 1111, label: 'Desgaste excesivo de los neumáticos delanteros.', isCorrect: false },
+          { id: 1112, label: 'Presencia de aire en el circuito hidráulico del sistema de frenos o fuga de líquido.', isCorrect: true },
+          { id: 1113, label: 'Falta de alineamiento y balanceo en el eje de dirección.', isCorrect: false },
+        ],
+      },
+      {
+        id: 112,
+        prompt: 'Terminada su jornada, un directivo le pide usar el vehículo institucional para trasladar pertenencias personales a su domicilio, argumentando "es una emergencia". ¿Qué debe hacer?',
+        explanation: 'El uso de bienes del Estado para fines privados configura una falta grave y el delito de peculado de uso.',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 1121, label: 'Apoyarlo sin dudar; es una orden directa de un superior.', isCorrect: false },
+          { id: 1122, label: 'Realizar el traslado cobrándole el gasto del combustible.', isCorrect: false },
+          { id: 1123, label: 'Negarse cortésmente; los vehículos del Estado son exclusivamente para actividades oficiales y comisiones de servicio.', isCorrect: true },
+        ],
+      },
+      {
+        id: 113,
+        prompt: 'Al encontrar un herido consciente tras un accidente, ¿cuál es la forma correcta según el protocolo de primeros auxilios?',
+        explanation: 'Mover inadecuadamente a un herido puede causar lesiones medulares irreversibles. Se debe mantenerlo tranquilo y esperar a los paramédicos.',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 1131, label: 'Darle de beber agua fría de inmediato para calmar los nervios.', isCorrect: false },
+          { id: 1132, label: 'Evitar mover al herido salvo peligro inminente, mantenerlo calmado y esperar a los paramédicos.', isCorrect: true },
+          { id: 1133, label: 'Sentarlo y masajear la zona del cuello por si tiene dolores.', isCorrect: false },
+        ],
+      },
+      {
+        id: 114,
+        prompt: 'Un conductor debe presentar una declaración jurada de no tener antecedentes para renovar sus accesos. ¿Qué principio de la Ley N° 27444 ampara que la institución confíe en su palabra sin exigir el documento original en ese momento?',
+        explanation: 'El principio de presunción de veracidad asume que el administrado dice la verdad, bajo sanción posterior si miente.',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 1141, label: 'Principio de legalidad.', isCorrect: false },
+          { id: 1142, label: 'Principio de presunción de veracidad.', isCorrect: true },
+          { id: 1143, label: 'Principio de celeridad.', isCorrect: false },
+        ],
+      },
+      {
+        id: 115,
+        prompt: 'Se aproxima a una intersección con una señal octogonal roja que dice "PARE" y no hay ningún vehículo ni peatón en la vía transversal. ¿Cómo debe proceder?',
+        explanation: 'La señal PARE exige detención total y absoluta de las llantas, haya o no tráfico. No hacerlo es una infracción grave.',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 1151, label: 'Disminuir ligeramente la velocidad y pasar rápido.', isCorrect: false },
+          { id: 1152, label: 'Tocar el claxon para avisar que cruzará sin detenerse.', isCorrect: false },
+          { id: 1153, label: 'Detener el vehículo por completo, verificar ambos lados y reanudar la marcha solo cuando esté seguro.', isCorrect: true },
+        ],
+      },
+      {
+        id: 116,
+        prompt: '¿Qué sucede con el consumo de combustible si el vehículo circula con presión de neumáticos inferior a la recomendada por el fabricante?',
+        explanation: 'Menos presión implica mayor resistencia al rodamiento, lo que obliga al motor a hacer más fuerza y consume más combustible.',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 1161, label: 'El consumo disminuye porque el vehículo tiene mayor agarre.', isCorrect: false },
+          { id: 1162, label: 'El consumo se mantiene igual; solo afecta la suspensión.', isCorrect: false },
+          { id: 1163, label: 'El consumo aumenta significativamente por la mayor resistencia al rodamiento.', isCorrect: true },
+        ],
+      },
+      {
+        id: 117,
+        prompt: 'Un conductor detecta que las facturas de combustible del grifo autorizado tienen un monto inflado respecto a lo abastecido realmente. ¿Cuál es su obligación?',
+        explanation: 'El principio de probidad obliga al servidor público a combatir la corrupción y proteger el presupuesto estatal.',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 1171, label: 'Guardar silencio para evitar problemas con el área administrativa.', isCorrect: false },
+          { id: 1172, label: 'Denunciar el hecho inmediatamente ante su jefe directo o la Oficina de Integridad Institucional de la PCM.', isCorrect: true },
+          { id: 1173, label: 'Aprovechar la diferencia económica para cubrir otros gastos menores del vehículo.', isCorrect: false },
+        ],
+      },
+      {
+        id: 118,
+        prompt: '¿En qué circunstancias está permitido el uso de la bocina (claxon) en el ámbito urbano para un conductor del Estado?',
+        explanation: 'El uso indiscriminado del claxon está sancionado como contaminación sonora. Solo se permite ante peligro inminente de choque.',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 1181, label: 'Para apurar al vehículo de adelante cuando el semáforo cambia a verde.', isCorrect: false },
+          { id: 1182, label: 'Para saludar a compañeros de la institución al ingresar al estacionamiento.', isCorrect: false },
+          { id: 1183, label: 'Únicamente para evitar un accidente de tránsito inminente, cuando resulten insuficientes otras señales.', isCorrect: true },
+        ],
+      },
+      {
+        id: 119,
+        prompt: '¿A partir de qué año de antigüedad se debe realizar la Inspección Técnica Vehicular (ITV) de un auto particular (categoría M1)?',
+        explanation: 'Según la norma, los vehículos categoría M1 deben someterse a ITV a partir del cuarto año, contado desde el año siguiente de su fabricación.',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 1191, label: 'A partir del segundo año.', isCorrect: false },
+          { id: 1192, label: 'A partir del cuarto año, contado desde el año siguiente de su fabricación.', isCorrect: true },
+          { id: 1193, label: 'A partir del sexto año.', isCorrect: false },
+        ],
+      },
+      {
+        id: 120,
+        prompt: '¿Qué significan las líneas amarillas discontinuas (intermitentes) pintadas en el pavimento de la calzada?',
+        explanation: 'Las líneas amarillas discontinuas indican que está permitido cruzar al otro carril para efectuar el adelantamiento vehicular, siempre que sea seguro.',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 1201, label: 'Prohibición absoluta de adelantamiento en esa vía.', isCorrect: false },
+          { id: 1202, label: 'Zona de uso exclusivo para vehículos de emergencia.', isCorrect: false },
+          { id: 1203, label: 'Está permitido cruzar al otro carril para efectuar el adelantamiento vehicular si es seguro.', isCorrect: true },
+        ],
+      },
+    ],
+  },
+  {
+    id: 2,
+    title: 'CAS · Analista Legal',
+    entity: 'Municipalidad de Lima',
+    timeLimitMinutes: 15,
+    questionsPerExam: 10,
+    pointsPerQuestion: 3,
+    passingScore: 21,
+    published: true,
+    questions: [
+      {
+        id: 201, prompt: '¿Qué norma crea el régimen de Contratación Administrativa de Servicios (CAS)?', explanation: 'El Decreto Legislativo 1057 creó el régimen CAS y su reglamento fue aprobado por D.S. N° 075-2008-PCM.',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 2011, label: 'Ley 30057 (Ley del Servicio Civil)', isCorrect: false },
+          { id: 2012, label: 'Decreto Legislativo 1057', isCorrect: true },
+          { id: 2013, label: 'Decreto Legislativo 728', isCorrect: false },
+          { id: 2014, label: 'Ley 24041', isCorrect: false },
+        ],
+      },
+      {
+        id: 202, prompt: '¿Cuál es el ente rector del sistema de gestión de recursos humanos del Estado peruano?', explanation: '',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 2021, label: 'SUNAFIL', isCorrect: false },
+          { id: 2022, label: 'MEF', isCorrect: false },
+          { id: 2023, label: 'SERVIR', isCorrect: true },
+          { id: 2024, label: 'Contraloría General de la República', isCorrect: false },
+        ],
+      },
+      {
+        id: 203, prompt: '¿Qué ley aprueba el Código de Ética de la Función Pública?', explanation: '',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 2031, label: 'Ley 27815', isCorrect: true },
+          { id: 2032, label: 'Ley 27444', isCorrect: false },
+          { id: 2033, label: 'Ley 28175', isCorrect: false },
+          { id: 2034, label: 'Ley 30225', isCorrect: false },
+        ],
+      },
+      {
+        id: 204, prompt: '¿Qué ley regula las contrataciones del Estado?', explanation: '',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 2041, label: 'Ley 27444', isCorrect: false },
+          { id: 2042, label: 'Ley 30225', isCorrect: true },
+          { id: 2043, label: 'Ley 27867', isCorrect: false },
+          { id: 2044, label: 'Ley 28411', isCorrect: false },
+        ],
+      },
+      {
+        id: 205, prompt: 'El principio de legalidad en el procedimiento administrativo exige que la autoridad…', explanation: '',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 2051, label: 'Use discrecionalidad total en sus decisiones', isCorrect: false },
+          { id: 2052, label: 'Actúe dentro de las facultades que le otorga el ordenamiento jurídico', isCorrect: true },
+          { id: 2053, label: 'Priorice la celeridad sobre la motivación', isCorrect: false },
+          { id: 2054, label: 'Omita motivar sus actos cuando sea urgente', isCorrect: false },
+        ],
+      },
+      {
+        id: 206, prompt: 'En el silencio administrativo positivo…', explanation: '',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 2061, label: 'Se deniega lo solicitado por el administrado', isCorrect: false },
+          { id: 2062, label: 'Se archiva el trámite por falta de respuesta', isCorrect: false },
+          { id: 2063, label: 'Se suspende el plazo hasta nueva notificación', isCorrect: false },
+          { id: 2064, label: 'Se entiende aprobada la solicitud del administrado', isCorrect: true },
+        ],
+      },
+      {
+        id: 207, prompt: '¿Quién ejerce el control gubernamental superior en el Perú?', explanation: '',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 2071, label: 'Defensoría del Pueblo', isCorrect: false },
+          { id: 2072, label: 'JNE', isCorrect: false },
+          { id: 2073, label: 'Tribunal Constitucional', isCorrect: false },
+          { id: 2074, label: 'Contraloría General de la República', isCorrect: true },
+        ],
+      },
+      {
+        id: 208, prompt: '¿En qué año se aprobó la Constitución Política vigente del Perú?', explanation: '',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 2081, label: '1979', isCorrect: false },
+          { id: 2082, label: '1993', isCorrect: true },
+          { id: 2083, label: '2001', isCorrect: false },
+          { id: 2084, label: '1980', isCorrect: false },
+        ],
+      },
+      {
+        id: 209, prompt: 'Según la Ley N° 27444, ¿cuál es el principio por el cual las entidades presumen que los documentos y declaraciones presentados por los ciudadanos son verdaderos?', explanation: '',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 2091, label: 'Principio de legalidad', isCorrect: false },
+          { id: 2092, label: 'Principio de presunción de veracidad', isCorrect: true },
+          { id: 2093, label: 'Principio de celeridad', isCorrect: false },
+          { id: 2094, label: 'Principio de informalismo', isCorrect: false },
+        ],
+      },
+      {
+        id: 210, prompt: '¿Qué institución es el ente rector de la Modernización de la Gestión Pública en el Perú?', explanation: '',
+        isPinned: false, fixedPosition: null,
+        options: [
+          { id: 2101, label: 'MEF', isCorrect: false },
+          { id: 2102, label: 'SERVIR', isCorrect: false },
+          { id: 2103, label: 'PCM - Secretaría de Gestión Pública', isCorrect: true },
+          { id: 2104, label: 'OSCE', isCorrect: false },
+        ],
+      },
+    ],
+  },
+]
