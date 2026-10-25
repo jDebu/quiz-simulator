@@ -112,7 +112,7 @@ export const useAppStore = defineStore('app', () => {
   }
 
   // Admin CRUD
-  function upsertQuiz(data: Omit<Quiz, 'questions' | 'published'> & { id?: number }): number {
+  function upsertQuiz(data: Omit<Quiz, 'questions' | 'published' | 'id'> & { id?: number; published?: boolean }): number {
     if (data.id) {
       const idx = quizzes.value.findIndex(q => q.id === data.id)
       if (idx >= 0) {

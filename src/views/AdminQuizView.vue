@@ -77,6 +77,16 @@
       </div>
 
       <template v-else>
+        <!-- Bulk upload bar -->
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--bd)">
+          <span class="mu" style="font-size:13px">Carga masiva:</span>
+          <button class="btn sec sm" @click="downloadTemplate">↓ Descargar plantilla</button>
+          <label class="btn sec sm" style="cursor:pointer;font-weight:600">
+            ↑ Importar Excel
+            <input type="file" accept=".xlsx,.xls" style="display:none" @change="handleFile" />
+          </label>
+        </div>
+
         <div class="row" style="justify-content:flex-start;margin-bottom:10px">
           <div style="flex:1;min-width:200px">
             <input v-model="qSearch" placeholder="Buscar en enunciados y opciones…" aria-label="Buscar pregunta" />
@@ -154,6 +164,11 @@
       <label for="qp">Enunciado</label>
       <textarea id="qp" v-model="qModal.prompt"></textarea>
       <p v-if="qErr.prompt" class="err">{{ qErr.prompt }}</p>
+      <div v-if="duplicateWarning" style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:8px 12px;font-size:13px;margin-top:4px;color:#856404">
+        ⚠️ Enunciado similar ({{ Math.round(duplicateWarning.score * 100) }}%) a una pregunta existente:<br>
+        <em>"{{ duplicateWarning.prompt.slice(0, 90) }}{{ duplicateWarning.prompt.length > 90 ? '…' : '' }}"</em>
+        <br><span style="font-weight:400">Podés guardar de todos modos si es una pregunta distinta.</span>
+      </div>
 
       <label style="margin-top:14px">Opciones (marca la correcta)</label>
       <div v-for="(opt, i) in qModal.options" :key="i" style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
@@ -238,6 +253,47 @@
     </div>
   </div>
 
+  <!-- Import modal -->
+  <div v-if="importState.open" class="modal" style="align-items:flex-start;overflow:auto;padding:20px">
+    <div class="card" style="max-width:720px;width:100%;margin:0">
+      <h2>Importar preguntas desde Excel</h2>
+      <p class="mu" style="margin-top:4px">
+        {{ importState.rows.length }} fila(s) procesada(s) ·
+        <span style="color:var(--ok)">{{ importState.valid.length }} válida(s)</span> ·
+        <span style="color:var(--ko)">{{ importState.rows.length - importState.valid.length }} con error(es)</span>
+      </p>
+      <div class="table-wrap" style="max-height:360px;overflow:auto;margin-top:12px">
+        <table>
+          <thead>
+            <tr><th>Fila</th><th>Enunciado</th><th>Opciones</th><th>Estado</th></tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in importState.rows" :key="row.rowNum">
+              <td>{{ row.rowNum }}</td>
+              <td style="max-width:260px">{{ row.prompt.slice(0, 80) }}{{ row.prompt.length > 80 ? '…' : '' }}</td>
+              <td class="mu" style="font-size:12px">{{ row.options.map((o,i) => 'ABCDE'[i]+') '+o).join(' · ') }}</td>
+              <td>
+                <span v-if="row.errors.length === 0 && !row.duplicate" class="badge ok">OK</span>
+                <span v-else-if="row.errors.length === 0 && row.duplicate" class="badge" style="background:#fff3cd;color:#856404">Similar</span>
+                <span v-else class="badge ko" :title="row.errors.join(' | ')">{{ row.errors[0] }}</span>
+                <div v-if="row.duplicate" class="mu" style="font-size:11px;margin-top:2px">⚠️ Similar a: "{{ row.duplicate }}…"</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p v-if="importState.valid.some(r => r.duplicate)" class="mu" style="margin-top:8px;font-size:13px">
+        Las filas marcadas como "Similar" también se importarán si no tienen errores.
+      </p>
+      <div class="acts" style="justify-content:flex-end;margin-top:16px">
+        <button class="btn sec" @click="importState.open = false">Cancelar</button>
+        <button class="btn" :disabled="importState.valid.length === 0" @click="confirmImport">
+          Importar {{ importState.valid.length }} pregunta(s)
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div v-if="toast" class="toast">{{ toast }}</div>
 </template>
 
@@ -246,6 +302,7 @@ import { ref, computed, reactive, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAppStore, drawQuestions, newId } from '../store'
 import type { Quiz, Question, Option } from '../store'
+import * as XLSX from 'xlsx'
 
 const store = useAppStore()
 const router = useRouter()
@@ -478,6 +535,117 @@ function runPreview() {
     preview.value = slots
   }
   showPreview.value = true
+}
+
+// Duplicate detection
+function promptSimilarity(a: string, b: string): number {
+  const words = (s: string) =>
+    new Set(s.toLowerCase().replace(/[^\wáéíóúüñ\s]/gi, '').split(/\s+/).filter(w => w.length > 2))
+  const sa = words(a)
+  const sb = words(b)
+  const inter = [...sa].filter(w => sb.has(w)).length
+  const union = new Set([...sa, ...sb]).size
+  return union === 0 ? 0 : inter / union
+}
+
+const duplicateWarning = computed<{ score: number; prompt: string } | null>(() => {
+  const p = qModal.prompt.trim()
+  if (p.length < 20) return null
+  for (const q of quiz.questions) {
+    if (q.id === qModal.id) continue
+    const score = promptSimilarity(p, q.prompt)
+    if (score >= 0.65) return { score, prompt: q.prompt }
+  }
+  return null
+})
+
+// Excel import / export
+interface ImportRow {
+  rowNum: number
+  prompt: string
+  options: string[]
+  correctIndex: number
+  isPinned: boolean
+  fixedPosition: number | null
+  explanation: string
+  errors: string[]
+  duplicate: string
+}
+
+const importState = reactive({
+  open: false,
+  rows: [] as ImportRow[],
+  valid: [] as ImportRow[],
+})
+
+function downloadTemplate() {
+  const headers = ['Enunciado', 'Opción A', 'Opción B', 'Opción C', 'Opción D', 'Opción E', 'Correcta', 'Fija', 'Posición', 'Explicación']
+  const example = [
+    '¿Cuál es la señal de tránsito que obliga a detenerse completamente?',
+    'Círculo amarillo',
+    'Octágono rojo (PARE)',
+    'Triángulo invertido',
+    '', '',
+    'B', 'NO', '',
+    'La señal PARE es octagonal y de color rojo.',
+  ]
+  const ws = XLSX.utils.aoa_to_sheet([headers, example])
+  ws['!cols'] = [60, 30, 30, 30, 30, 30, 10, 8, 10, 40].map(wch => ({ wch }))
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, 'Preguntas')
+  XLSX.writeFile(wb, 'plantilla_preguntas.xlsx')
+}
+
+async function handleFile(ev: Event) {
+  const file = (ev.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  ;(ev.target as HTMLInputElement).value = ''
+  const buf = await file.arrayBuffer()
+  const wb = XLSX.read(buf, { type: 'array' })
+  const ws = wb.Sheets[wb.SheetNames[0]]
+  const raw = XLSX.utils.sheet_to_json<(string | number | undefined)[]>(ws, { header: 1, defval: '' })
+  const rows: ImportRow[] = []
+  const valid: ImportRow[] = []
+  for (let i = 1; i < raw.length; i++) {
+    const r = (raw[i] as (string | number | undefined)[]).map(c => String(c ?? '').trim())
+    const prompt = r[0] ?? ''
+    const opts = [r[1], r[2], r[3], r[4], r[5]].filter(Boolean)
+    const correcta = (r[6] ?? '').toUpperCase()
+    const fija = (r[7] ?? '').toUpperCase()
+    const rawPos = r[8] ? parseInt(r[8]) : NaN
+    const fixedPosition = !isNaN(rawPos) && rawPos >= 1 ? rawPos : null
+    const explanation = r[9] ?? ''
+    const errors: string[] = []
+    if (!prompt) errors.push('Enunciado vacío')
+    if (opts.length < 2) errors.push('Mínimo 2 opciones')
+    const ci = 'ABCDE'.indexOf(correcta)
+    if (ci < 0 || ci >= opts.length) errors.push(`Correcta debe ser letra de opción disponible (${opts.map((_, j) => 'ABCDE'[j]).join(', ')})`)
+    if (new Set(opts.map(o => o.toLowerCase())).size < opts.length) errors.push('Opciones repetidas')
+    if (!isNaN(rawPos) && rawPos > quiz.questionsPerExam) errors.push(`Posición ${rawPos} supera preguntas por examen (${quiz.questionsPerExam})`)
+    let dup = ''
+    if (errors.length === 0) {
+      for (const q of quiz.questions) {
+        if (promptSimilarity(prompt, q.prompt) >= 0.65) { dup = q.prompt.slice(0, 60); break }
+      }
+    }
+    const row: ImportRow = { rowNum: i + 1, prompt, options: opts, correctIndex: Math.max(0, ci), isPinned: ['SI','SÍ','S','1','TRUE'].includes(fija), fixedPosition, explanation, errors, duplicate: dup }
+    rows.push(row)
+    if (errors.length === 0) valid.push(row)
+  }
+  importState.rows = rows
+  importState.valid = valid
+  importState.open = true
+}
+
+function confirmImport() {
+  for (const row of importState.valid) {
+    const options: Option[] = row.options.map((label, i) => ({ id: newId(), label, isCorrect: i === row.correctIndex }))
+    store.addQuestion(quiz.id, { prompt: row.prompt, options, explanation: row.explanation, isPinned: row.isPinned || row.fixedPosition !== null, fixedPosition: row.fixedPosition })
+  }
+  const found = store.quizzes.find(q => q.id === quiz.id)
+  if (found) quiz.questions = found.questions
+  importState.open = false
+  showToast(`${importState.valid.length} pregunta(s) importadas`)
 }
 
 // Logout
