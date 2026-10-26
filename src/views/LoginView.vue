@@ -48,7 +48,9 @@
 
         <p v-if="errors.general" class="err" style="margin-top:10px">{{ errors.general }}</p>
 
-        <button class="btn full" @click="submit">Iniciar simulación</button>
+        <button class="btn full" @click="submit" :disabled="submitting">
+          {{ submitting ? 'Iniciando…' : 'Iniciar simulación' }}
+        </button>
 
         <p class="mu" style="margin-top:14px;text-align:center">
           ¿Eres administrador?
@@ -91,7 +93,9 @@ function hideList() {
   setTimeout(() => { showList.value = false }, 150)
 }
 
-function submit() {
+const submitting = ref(false)
+
+async function submit() {
   const e: Record<string, string> = {}
   if (!selectedExam.value) e.exam = 'Selecciona un tipo de examen.'
   if (!username.value.trim()) e.username = 'Ingresa tu usuario.'
@@ -106,9 +110,17 @@ function submit() {
     return
   }
 
-  store.login(username.value.trim(), false)
-  store.startAttempt(selectedExam.value!)
-  router.push('/exam')
+  submitting.value = true
+  try {
+    store.login(username.value.trim(), false)
+    await store.startAttempt(selectedExam.value!)
+    router.push('/exam')
+  } catch (err) {
+    errors.value = { general: 'No se pudo iniciar el examen. Intenta de nuevo.' }
+    console.error(err)
+  } finally {
+    submitting.value = false
+  }
 }
 </script>
 

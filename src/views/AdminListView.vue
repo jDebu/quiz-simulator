@@ -101,7 +101,7 @@ const router = useRouter()
 const search = ref('')
 const statusFilter = ref('all')
 const toast = ref('')
-const deleteTarget = ref<{ id: number; title: string } | null>(null)
+const deleteTarget = ref<{ id: string; title: string } | null>(null)
 
 const filtered = computed(() => {
   const q = search.value.toLowerCase()
@@ -111,26 +111,26 @@ const filtered = computed(() => {
   )
 })
 
-function togglePub(id: number) {
-  const err = store.togglePublish(id)
+async function togglePub(id: string) {
+  const err = await store.togglePublish(id)
   if (err) { showToast(err); return }
   const quiz = store.quizzes.find(q => q.id === id)
   showToast(quiz?.published ? 'Quiz publicado' : 'Quiz despublicado')
 }
 
-function confirmDelete(id: number, title: string) {
+function confirmDelete(id: string, title: string) {
   deleteTarget.value = { id, title }
 }
 
-function doDelete() {
+async function doDelete() {
   if (!deleteTarget.value) return
-  store.removeQuiz(deleteTarget.value.id)
+  await store.removeQuiz(deleteTarget.value.id)
   deleteTarget.value = null
   showToast('Quiz eliminado')
 }
 
-function doLogout() {
-  store.logout()
+async function doLogout() {
+  await store.logout()
   router.push('/admin/login')
 }
 

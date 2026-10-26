@@ -312,7 +312,7 @@ const quizId = computed(() => route.params.id as string)
 const isNew = computed(() => quizId.value === 'new')
 
 const quiz = reactive<Quiz>({
-  id: 0,
+  id: '',
   title: '',
   entity: '',
   timeLimitMinutes: 15,
@@ -325,7 +325,7 @@ const quiz = reactive<Quiz>({
 
 onMounted(() => {
   if (!isNew.value) {
-    const found = store.quizzes.find(q => q.id === Number(quizId.value))
+    const found = store.quizzes.find(q => q.id === quizId.value)
     if (!found) { router.push('/admin'); return }
     Object.assign(quiz, JSON.parse(JSON.stringify(found)))
   }
@@ -344,7 +344,7 @@ const poolWarning = computed(() => {
 
 const formErr = ref<Record<string, string>>({})
 
-function saveQuiz() {
+async function saveQuiz() {
   const e: Record<string, string> = {}
   if (!quiz.title.trim()) e.title = 'El título es obligatorio.'
   if (!(quiz.timeLimitMinutes >= 1 && quiz.timeLimitMinutes <= 240)) e.time = 'Entre 1 y 240 minutos.'
@@ -354,32 +354,36 @@ function saveQuiz() {
   formErr.value = e
   if (Object.keys(e).length) return
 
-  if (isNew.value) {
-    const id = store.upsertQuiz({
-      title: quiz.title,
-      entity: quiz.entity,
-      timeLimitMinutes: quiz.timeLimitMinutes,
-      questionsPerExam: quiz.questionsPerExam,
-      pointsPerQuestion: quiz.pointsPerQuestion,
-      passingScore: quiz.passingScore,
-    })
-    showToast('Quiz guardado')
-    router.replace(`/admin/quiz/${id}`)
-  } else {
-    store.upsertQuiz({
-      id: quiz.id,
-      title: quiz.title,
-      entity: quiz.entity,
-      timeLimitMinutes: quiz.timeLimitMinutes,
-      questionsPerExam: quiz.questionsPerExam,
-      pointsPerQuestion: quiz.pointsPerQuestion,
-      passingScore: quiz.passingScore,
-      published: quiz.published,
-    })
-    // sync questions from store
-    const found = store.quizzes.find(q => q.id === quiz.id)
-    if (found) quiz.questions = found.questions
-    showToast('Quiz guardado')
+  try {
+    if (isNew.value) {
+      const id = await store.upsertQuiz({
+        title: quiz.title,
+        entity: quiz.entity,
+        timeLimitMinutes: quiz.timeLimitMinutes,
+        questionsPerExam: quiz.questionsPerExam,
+        pointsPerQuestion: quiz.pointsPerQuestion,
+        passingScore: quiz.passingScore,
+      })
+      showToast('Quiz guardado')
+      router.replace(`/admin/quiz/${id}`)
+    } else {
+      await store.upsertQuiz({
+        id: quiz.id,
+        title: quiz.title,
+        entity: quiz.entity,
+        timeLimitMinutes: quiz.timeLimitMinutes,
+        questionsPerExam: quiz.questionsPerExam,
+        pointsPerQuestion: quiz.pointsPerQuestion,
+        passingScore: quiz.passingScore,
+        published: quiz.published,
+      })
+      const found = store.quizzes.find(q => q.id === quiz.id)
+      if (found) quiz.questions = found.questions
+      showToast('Quiz guardado')
+    }
+  } catch (err) {
+    showToast('Error al guardar quiz')
+    console.error(err)
   }
 }
 
@@ -414,7 +418,7 @@ const pagedQuestions = computed(() => filteredQuestions.value.slice(pageStart.va
 // Question modal
 interface QModal {
   open: boolean
-  id: number | null
+  id: string | null
   prompt: string
   options: { label: string }[]
   correctIndex: number
@@ -436,7 +440,7 @@ const qModal = reactive<QModal>({
 
 const qErr = ref<Record<string, string>>({})
 
-function openQuestion(id: number | null) {
+function openQuestion(id: string | null) {
   qErr.value = {}
   if (id === null) {
     Object.assign(qModal, {
@@ -467,7 +471,7 @@ function isPositionTaken(pos: number): boolean {
   return quiz.questions.some(q => q.fixedPosition === pos && q.id !== qModal.id)
 }
 
-function saveQuestion() {
+async function saveQuestion() {
   const e: Record<string, string> = {}
   const opts = qModal.options.map(o => o.label.trim())
   if (!qModal.prompt.trim()) e.prompt = 'El enunciado es obligatorio.'
@@ -493,34 +497,41 @@ function saveQuestion() {
     fixedPosition: qModal.fixedPosition,
   }
 
-  if (qModal.id === null) {
-    store.addQuestion(quiz.id, qData)
-  } else {
-    store.updateQuestion(quiz.id, qModal.id, qData)
+  try {
+    if (qModal.id === null) {
+      await store.addQuestion(quiz.id, qData)
+    } else {
+      await store.updateQuestion(quiz.id, qModal.id, qData)
+    }
+    const found = store.quizzes.find(q => q.id === quiz.id)
+    if (found) quiz.questions = found.questions
+    qModal.open = false
+    showToast('Pregunta guardada')
+  } catch (err) {
+    showToast('Error al guardar pregunta')
+    console.error(err)
   }
-
-  // sync
-  const found = store.quizzes.find(q => q.id === quiz.id)
-  if (found) quiz.questions = found.questions
-
-  qModal.open = false
-  showToast('Pregunta guardada')
 }
 
 // Delete question
-const deleteQTarget = ref<{ id: number; prompt: string } | null>(null)
+const deleteQTarget = ref<{ id: string; prompt: string } | null>(null)
 
-function confirmDeleteQ(id: number, prompt: string) {
+function confirmDeleteQ(id: string, prompt: string) {
   deleteQTarget.value = { id, prompt }
 }
 
-function doDeleteQ() {
+async function doDeleteQ() {
   if (!deleteQTarget.value) return
-  store.removeQuestion(quiz.id, deleteQTarget.value.id)
-  const found = store.quizzes.find(q => q.id === quiz.id)
-  if (found) quiz.questions = found.questions
-  deleteQTarget.value = null
-  showToast('Pregunta eliminada')
+  try {
+    await store.removeQuestion(quiz.id, deleteQTarget.value.id)
+    const found = store.quizzes.find(q => q.id === quiz.id)
+    if (found) quiz.questions = found.questions
+    deleteQTarget.value = null
+    showToast('Pregunta eliminada')
+  } catch (err) {
+    showToast('Error al eliminar pregunta')
+    console.error(err)
+  }
 }
 
 // Sorteo preview
@@ -637,10 +648,10 @@ async function handleFile(ev: Event) {
   importState.open = true
 }
 
-function confirmImport() {
+async function confirmImport() {
   for (const row of importState.valid) {
     const options: Option[] = row.options.map((label, i) => ({ id: newId(), label, isCorrect: i === row.correctIndex }))
-    store.addQuestion(quiz.id, { prompt: row.prompt, options, explanation: row.explanation, isPinned: row.isPinned || row.fixedPosition !== null, fixedPosition: row.fixedPosition })
+    await store.addQuestion(quiz.id, { prompt: row.prompt, options, explanation: row.explanation, isPinned: row.isPinned || row.fixedPosition !== null, fixedPosition: row.fixedPosition })
   }
   const found = store.quizzes.find(q => q.id === quiz.id)
   if (found) quiz.questions = found.questions
@@ -649,8 +660,8 @@ function confirmImport() {
 }
 
 // Logout
-function doLogout() {
-  store.logout()
+async function doLogout() {
+  await store.logout()
   router.push('/admin/login')
 }
 

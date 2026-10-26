@@ -1,11 +1,11 @@
 export interface Option {
-  id: number
+  id: string
   label: string
   isCorrect: boolean
 }
 
 export interface Question {
-  id: number
+  id: string
   prompt: string
   options: Option[]
   explanation: string
@@ -14,7 +14,7 @@ export interface Question {
 }
 
 export interface Quiz {
-  id: number
+  id: string
   title: string
   entity: string
   timeLimitMinutes: number
@@ -38,10 +38,11 @@ export interface AttemptResult {
 }
 
 export interface Attempt {
-  quizId: number
+  id?: string
+  quizId: string
   quiz: Quiz
   questions: Question[]
-  answers: Record<number, number | null>
+  answers: Record<string, string | null>
   startedAt: number
   expiresAt: number
   result?: AttemptResult

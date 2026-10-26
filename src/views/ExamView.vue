@@ -163,7 +163,7 @@ function formatTime(s: number): string {
   return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
 }
 
-function selectAnswer(optionId: number) {
+function selectAnswer(optionId: string) {
   if (!store.attempt || result.value) return
   store.setAnswer(currentQ.value.id, optionId)
   if (currentIndex.value < questions.value.length - 1) {
@@ -171,9 +171,18 @@ function selectAnswer(optionId: number) {
   }
 }
 
-function submit(reason: 'manual' | 'time_expired') {
+async function submit(reason: 'manual' | 'time_expired') {
   if (examTimer) { clearInterval(examTimer); examTimer = null }
-  result.value = store.submitAttempt(reason)
+  try {
+    result.value = await store.submitAttempt(reason)
+  } catch (err) {
+    console.error('Error al enviar examen:', err)
+    result.value = {
+      score: 0, maxScore: 0, passingScore: 0, passed: false,
+      correctCount: 0, incorrectCount: 0, unansweredCount: 0,
+      submittedAt: Date.now(), reason,
+    }
+  }
   startCloseTimer()
 }
 
@@ -185,9 +194,9 @@ function startCloseTimer() {
   }, 1000)
 }
 
-function doLogout() {
+async function doLogout() {
   if (closeTimer) { clearInterval(closeTimer); closeTimer = null }
-  store.logout()
+  await store.logout()
   router.push('/')
 }
 
